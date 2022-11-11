@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- TemplateBeginEditable name="doctitle" -->
+    <title> Merging nucleus datasets by correlation-based cross-training</title>
+    <!-- TemplateEndEditable -->
+    <!-- TemplateBeginEditable name="head" -->
+    <!-- TemplateEndEditable -->
+    
+    <style type="text/css">
+        
+        body {
+            font: 100%/1.4 Verdana, Arial, Helvetica, sans-serif;
+            background-color: #42413C;
+            margin: 0;
+            padding: 0;
+            color: #000;
+            background-attachment: fixed;
+            font-size: 17px;
+        }
+
+        /* ~~ Element/tag selectors ~~ */
+        ul, ol, dl { /* Due to variations between browsers, it's best practices to zero padding and margin on lists. For consistency, you can either specify the amounts you want here, or on the list items (LI, DT, DD) they contain. Remember that what you do here will cascade to the .nav list unless you write a more specific selector. */
+            padding: 0;
+            margin: 0;
+        }
+
+        h1, h2, h3, h4, h5, h6, p {
+            margin-top: 0; /* removing the top margin gets around an issue where margins can escape from their containing div. The remaining bottom margin will hold it away from any elements that follow. */
+            padding-right: 15px;
+            padding-left: 15px; /* adding the padding to the sides of the elements within the divs, instead of the divs themselves, gets rid of any box model math. A nested div with side padding can also be used as an alternate method. */
+            font-size: 130%;
+            text-align: justify;
+        }
+
+        a img { /* this selector removes the default blue border displayed in some browsers around an image when it is surrounded by a link */
+            border: none;
+        }
+
+        /* ~~ Styling for your site's links must remain in this order - including the group of selectors that create the hover effect. ~~ */
+        a:link {
+            color: #42413C; /* unless you style your links to look extremely unique, it's best to provide underlines for quick visual identification */
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+        }
+
+        a:visited {
+            color: #6E6C64;
+        }
+
+        a:hover, a:active, a:focus { /* this group of selectors will give a keyboard navigator the same hover experience as the person using a mouse. */
+            text-decoration: none;
+        }
+
+        /* ~~ this fixed width container surrounds all other divs~~ */
+        .container {
+            width: 1000px;
+            background-color: #FFF;
+            margin: 0 auto; /* the auto value on the sides, coupled with the width, centers the layout */
+            overflow: hidden; /* this declaration makes the .container understand where the floated columns within ends and contain them */
+        }
+
+        /* ~~ These are the columns for the layout. ~~
+
+        1) Padding is only placed on the top and/or bottom of the divs. The elements within these divs have padding on their sides. This saves you from any "box model math". Keep in mind, if you add any side padding or border to the div itself, it will be added to the width you define to create the *total* width. You may also choose to remove the padding on the element in the div and place a second div within it with no width and the padding necessary for your design.
+
+        2) No margin has been given to the columns since they are all floated. If you must add margin, avoid placing it on the side you're floating toward (for example: a right margin on a div set to float right). Many times, padding can be used instead. For divs where this rule must be broken, you should add a "display:inline" declaration to the div's rule to tame a bug where some versions of Internet Explorer double the margin.
+
+        3) Since classes can be used multiple times in a document (and an element can also have multiple classes applied), the columns have been assigned class names instead of IDs. For example, two sidebar divs could be stacked if necessary. These can very easily be changed to IDs if that's your preference, as long as you'll only be using them once per document.
+
+        4) If you prefer your nav on the right instead of the left, simply float these columns the opposite direction (all right instead of all left) and they'll render in reverse order. There's no need to move the divs around in the HTML source.
+
+        */
+        .sidebar1 {
+            float: left;
+            width: 180px;
+            height: 800px;
+            background-color: #EADCAE;
+            padding-bottom: 10px;
+        }
+
+        .content {
+            padding: 10px 0px 10px 0px;
+            width: 1000px;
+            float: center;
+            text-align: center;
+        }
+
+        .sidebar2 {
+            float: left;
+            width: 180px;
+            background-color: #EADCAE;
+            padding: 10px 0;
+        }
+
+        /* ~~ This grouped selector gives the lists in the .content area space ~~ */
+        .content ul, .content ol {
+            padding: 0 15px 15px 40px; /* this padding mirrors the right padding in the headings and paragraph rule above. Padding was placed on the bottom for space between other elements on the lists and on the left to create the indention. These may be adjusted as you wish. */
+        }
+
+        /* ~~ The navigation list styles (can be removed if you choose to use a premade flyout menu like Spry) ~~ */
+        ul.nav {
+            list-style: none; /* this removes the list marker */
+            border-top: 1px solid #666; /* this creates the top border for the links - all others are placed using a bottom border on the LI */
+            margin-bottom: 15px; /* this creates the space between the navigation on the content below */
+        }
+
+            ul.nav li {
+                border-bottom: 1px solid #666; /* this creates the button separation */
+            }
+
+            ul.nav a, ul.nav a:visited { /* grouping these selectors makes sure that your links retain their button look even after being visited */
+                padding: 5px 5px 5px 15px;
+                display: block; /* this gives the link block properties causing it to fill the whole LI containing it. This causes the entire area to react to a mouse click. */
+                width: 160px; /*this width makes the entire button clickable for IE6. If you don't need to support IE6, it can be removed. Calculate the proper width by subtracting the padding on this link from the width of your sidebar container. */
+                text-decoration: none;
+                background-color: #C6D580;
+            }
+
+                ul.nav a:hover, ul.nav a:active, ul.nav a:focus { /* this changes the background and text color for both mouse and keyboard navigators */
+                    background-color: #ADB96E;
+                    color: #FFF;
+                }
+
+        /* ~~ miscellaneous float/clear classes ~~ */
+        .fltrt { /* this class can be used to float an element right in your page. The floated element must precede the element it should be next to on the page. */
+            float: right;
+            margin-left: 8px;
+        }
+
+        .fltlft { /* this class can be used to float an element left in your page. The floated element must precede the element it should be next to on the page. */
+            float: left;
+            margin-right: 8px;
+        }
+
+        .clearfloat { /* this class can be placed on a <br /> or empty div as the final element following the last floated div (within the #container) if the overflow:hidden on the .container is removed */
+            clear: both;
+            height: 0;
+            font-size: 1px;
+            line-height: 0px;
+        }
+
+        .container .content .content {
+            font-size: 100%;
+            text-align: center;
+        }
+        
+    </style>
+    
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="content">
+            <table width="80%" align="center" cellspacing="10">
+                <tr>
+                    <td align="center" style="font-size:120%"><strong>Merging nucleus datasets by correlation-based cross-training</strong></td>
+                </tr>
+                <tr>
+                    <td align="center" style="font-size:90%">Wenhua Zhang*<sup>1,2</sup>,&nbsp; <a href="https://enigma-li.github.io/" style="text-decoration:none;">Jun Zhang*<sup>2</sup></a>,&nbsp; Sen Yang<sup>2</sup>,&nbsp; Xiyue Wang<sup>3</sup>, </br>Wei Yang<sup>2</sup>,&nbsp; <a href="http://www.en.sc.sdu.edu.cn/info/1027/1152.htm" style="text-decoration:none;">Junzhou Huang<sup>2</sup></a>,&nbsp; &nbsp;<a href="http://i.cs.hku.hk/~wenping/" style="text-decoration:none;">Wenping Wang#<sup>1,4</sup></a>, Xiao Han#<sup>2</sup></td>
+                </tr>
+                <tr>
+                    <td align="center" style="font-size:90%"><sup>1</sup>The University of Hong Kong,&nbsp;&nbsp; <sup>2</sup>Tencent AI Lab,&nbsp;&nbsp; <sup>3</sup>Sichuan Univerisity,&nbsp;&nbsp; <sup>4</sup>Texas A&M University,&nbsp;&nbsp; </td>
+                </tr>
+                <tr>
+                    <!--td align="center" style="font-size:90%">Medical Image Analysis (MIA), 2021</td-->
+                </tr>
+                <tr>
+                    <td align="center" style="font-size:100%">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center"><img src="src\results.png" width="100%" alt="Paper teaser" /></td>
+                </tr>
+                <tr>
+                    <td align="justify" style="font-size:75%">
+                        Fig. 1. Example of visual results from the merged dataset. The top row shows an image from the <a href="https://github.com/vqdang/hover_net/" style="text-decoration:none;">CoNSeP</a> dataset and its four corresponding classifications in the merged dataset. It has one ground-truth labeling (The CoNSeP label set) and three predicted classifications. The bottom row shows an image from the <a href="https://ieeexplore.ieee.org/abstract/document/7872382" style="text-decoration:none;">Kumar</a> dataset with its four corresponding classifications all predicted by our framework.
+                    </td>
+                </tr>
+                <tr>
+                    <td align="left" style="font-size:100%"><strong>Data</strong></td>
+                </tr>
+                <tr align="left">
+                    <td>
+                        <table>
+                            <tr>
+                                <td align="justify" style="font-size:75%">
+                                    <strong style="color:red">Download Data</strong> [<a href="https://github.com/WinnieLaugh/Dataset_Merger.git">Onedrive</a>] <br /><br />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="left" style="font-size:100%"><strong>Data format</strong></td>
+                </tr>
+                <tr align="left">
+                    <td>
+                        <table>
+                            <tr>
+                                <td><img src="src\dataset_structure.png" width="300"/></td>
+                                <td>&nbsp;</td>
+                                <td align="justify" style="font-size:75%">
+                                    We organize the output of our algorithm as a final merged dataset. For each label set (<a href="https://link.springer.com/chapter/10.1007/978-3-030-23937-4_2">panNuke</a>, <a href="https://arxiv.org/abs/2102.09099">NuCLS</a>, <a href="https://www.sciencedirect.com/science/article/abs/pii/S1361841519301045">CoNSeP</a>, <a href="https://pure.rug.nl/ws/portalfiles/portal/203794746/MoNuSAC2020_A_Multi_Organ_Nuclei_Segmentation_and_Classification_Challenge.pdf">MoNuSAC</a>), We show the data from all the seven datasets (<a href="https://link.springer.com/chapter/10.1007/978-3-030-23937-4_2">panNuke</a>, <a href="https://arxiv.org/abs/2102.09099">NuCLS</a>, <a href="https://www.sciencedirect.com/science/article/abs/pii/S1361841519301045">CoNSeP</a>, <a href="https://pure.rug.nl/ws/portalfiles/portal/203794746/MoNuSAC2020_A_Multi_Organ_Nuclei_Segmentation_and_Classification_Challenge.pdf">MoNuSAC</a>, <a href="https://ieeexplore.ieee.org/abstract/document/7872382">kumar</a>, <a href="https://ieeexplore.ieee.org/abstract/document/8880654">MoNuSeg</a>, <a href="Segmentation of nuclei in histopathology images by deep regression of the distance map.">TNBC</a>) we organize and our predictions for each nucleus. We use a pickle file for each dataset under each label set. The pickle file is a dictionary with keys of image filenames and contents of instance predictions. For each prediction, the first item is the nuclear centroid location, the second item is our prediction for the item, the third item is the prediction's probability, and the last item is the groud-truth label if available (we set it as -1 if there is no groud-truth label for the data under the label set.). <br /><br />
+
+                                    We also include the overlay images with different colors for the centroid points in the released dataset for visualization. The code to draw the overlay images are also released to demonstrate the data usage. 
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="left" style="font-size:100%"><strong>Code</strong></td>
+                </tr>
+                <tr align="left">
+                    <td>
+                        <table>
+                            <tr>
+                                <td><!--img src="src\paper_thumbnail.png" width="220"/--></td>
+                                <td>&nbsp;</td>
+                                <td align="justify" style="font-size:75%">
+                                    <!--strong>Paper</strong> [<a href="" target="_blank">PDF (Coming Soon)</a>] <br/><br /-->
+                                    [<a href="https://github.com/WinnieLaugh/Dataset_Merger.git">Github page</a>] <br /><br />
+                                    <!--strong>Citation:</strong><br>Cui, Z., Li, C., Chen, N., Wei, G., Chen, R., Zhou, Y., & Wang, W. (2021). TSegNet: an Efficient and Accurate Tooth Segmentation Network on 3D Dental Model. Medical Image Analysis, 101949. &nbsp;<a href="./src/tsegNet.bib" target="_blank">(bibtex)</a><br/><br/-->
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td align="left" style="font-size:100%"><strong>Abstract</strong></td>
+                </tr>
+                <tr>
+                    <td align="justify" style="font-size:75%">
+                        Fine-grained nucleus classification is challenging because of the high inter-class similarity and intra-class variability. Therefore, a large number of labeled data is required for training effective nucleus classification models. However, it is challenging to label a large-scale nucleus classification dataset comparable to ImageNet in natural images, considering that high-quality nucleus labeling requires specific domain knowledge. In addition, the existing publicly available datasets are often inconsistently labeled with divergent labeling criteria. Due to this inconsistency, conventional models have to be trained on each dataset separately and work independently to infer their own classification results, limiting their classification performance. To fully utilize all annotated datasets, we formulate the nucleus classification task as a multi-label problem with missing labels to utilize all datasets in a unified framework. Specifically, we merge all datasets and combine their labels as multiple labels. Thus, each data has one ground-truth label and several missing labels. We devise a base classification module which is trained using all data but sparsely supervised by the ground-truth labels only. We then exploit the correlation among different label sets by a label correlation module. By doing so, we can have two trained basic modules and further cross-train them with both ground-truth labels and pseudo labels for the missing ones. Importantly, data without any ground-truth labels can also be involved in our framework, as we can regard them as data with all labels missing and generate the corresponding pseudo labels. We carefully re-organized multiple publicly available nucleus classification datasets, converted them into a uniform format, and tested the proposed framework on them. Experimental results show substantial improvement compared to the state-of-the-art methods.</td>
+                </tr>
+                <!--<tr>
+                    <td align="left" style="font-size:110%"><strong>Paper and data</strong></td>
+                </tr>-->
+                <tr>
+                    <td align="center">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="left" style="font-size:100%"><strong>Network Overview</strong></td>
+                </tr>
+                <tr>
+                    <td><img src="src\pipeline.png" width="100%" /></td>
+                </tr>
+                <tr>
+                    <td align="justify" style="font-size:75%">
+                        Fig. 2.Framework of our method. We use data xi from D1 as an example here. Our pipeline consists of three main training steps: A) joint training with sparse supervision, B) label correlation learning, and C) cross-training with label completion. We first train the base classification module and label correlation module individually with ground truth labels yi,1 with cross entropy cosses L0 and L1 (Step A and B). We then cross-train the two modules with both the ground truth labels yi,1 and the mutually completed pseudo-labels(Step C). 
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center">&nbsp;</td>
+                </tr>
+
+                <tr>
+                    <td align="center" style="font-size:80%">&copy;Wenhua Zhang. Last update: Nov., 2022.</td>
+                </tr>
+            </table>
+        </div>
+        <!-- end .container -->
+    </div>
+</body>
+</html>
